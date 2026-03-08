@@ -1,202 +1,103 @@
-Telco Customer Churn Prediction - ML Pipeline
-Objective
-The primary objective of this project is to build a **production-ready, reusable machine learning pipeline** for predicting customer churn in a telecommunications company.
+Customer Churn Prediction Pipeline
 
-### Business Objectives:
-- Identify customers at high risk of churning with at least 80% accuracy
-- Enable proactive customer retention strategies
-- Reduce customer acquisition costs by targeting retention efforts
-- Increase customer lifetime value through early intervention
-
-### Technical Objectives:
-- Build an end-to-end ML pipeline using scikit-learn Pipeline API
-- Implement automated data preprocessing (scaling, encoding, handling missing values)
-- Train and compare multiple models (Logistic Regression and Random Forest)
-- Perform hyperparameter tuning using GridSearchCV
-- Export the complete pipeline for production deployment
-- Ensure the pipeline handles edge cases (missing values, unknown categories)
+## Objective
+The objective of this project is to develop a robust machine learning pipeline to predict customer churn for a telecommunications company. Predicting churn allows businesses to identify at-risk customers and take proactive retention measures.
 
 ---
 
-## 🔬 Methodology / Approach
+## Methodology / Approach
 
-### 1. **Data Understanding and Exploration**
-- **Dataset**: Telco Customer Churn dataset with 7,043 customers and 20 features
-- **Target Variable**: Binary churn indicator (Yes/No)
-- **Class Distribution**: 26.5% churn rate (imbalanced dataset)
-- **Feature Types**: Mix of numeric (tenure, charges) and categorical (contract type, payment method) features
+1. **Data Loading and Exploration**
+   - Loaded the Telco Customer Churn dataset.
+   - Conducted exploratory data analysis (EDA) to understand data distribution, missing values, and target imbalance.
+   - Visualized churn distribution.
 
-### 2. **Data Preprocessing Pipeline**
+2. **Data Preprocessing**
+   - Separated numeric and categorical features.
+   - Created preprocessing pipelines:
+     - Numeric: Imputation (median) + Scaling (StandardScaler)
+     - Categorical: Imputation (constant 'missing') + One-Hot Encoding
+   - Ensured `TotalCharges` is numeric.
 
-python
-# Numeric Pipeline
-numeric_pipeline = Pipeline([
-    ('imputer', SimpleImputer(strategy='median')),  # Handle missing values
-    ('scaler', StandardScaler())                    # Scale features
-])
+3. **Modeling**
+   - Built two baseline models using pipelines:
+     - Logistic Regression
+     - Random Forest Classifier
+   - Evaluated baseline performance using accuracy and ROC-AUC.
 
-# Categorical Pipeline
-categorical_pipeline = Pipeline([
-    ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),  # Handle missing values
-    ('onehot', OneHotEncoder(handle_unknown='ignore'))  # One-hot encode with unknown handling
-])
+4. **Hyperparameter Tuning**
+   - Performed GridSearchCV for both models to find the best parameters.
+   - Optimized for ROC-AUC metric.
 
-# Combined Preprocessor
-preprocessor = ColumnTransformer([
-    ('numeric', numeric_pipeline, numeric_features),
-    ('categorical', categorical_pipeline, categorical_features)
-])
-3. Model Development
-Model 1: Logistic Regression
-Serves as a baseline interpretable model
+5. **Evaluation**
+   - Evaluated the best models on the test set.
+   - Metrics reported:
+     - Accuracy
+     - ROC-AUC
+     - Classification report
+     - Confusion matrix
+     - ROC curves
+   - Feature importance plotted for Random Forest.
 
-Linear decision boundary
+6. **Model Selection**
+   - Compared models using ROC-AUC and test accuracy.
+   - Random Forest was selected as the final model due to superior ROC-AUC.
 
-Provides probability scores for churn
+7. **Exporting & Deployment Readiness**
+   - Saved the entire pipeline (`customer_churn_pipeline.pkl`) for production use.
+   - Saved model metadata (`model_metadata.json`) for reproducibility.
+   - Developed prediction function to handle new customer data.
+   - Performed production readiness tests:
+     - Missing values handling
+     - Unknown category handling
 
-Model 2: Random Forest
-Ensemble method capturing non-linear relationships
+---
 
-Handles feature interactions automatically
+## Key Results / Observations
 
-Provides feature importance scores
+- **Churn Rate:** Approximately 27% of customers are likely to churn.
+- **Baseline Model Performance:**
+  - Logistic Regression Test Accuracy: ~X%
+  - Random Forest Test Accuracy: ~Y%
+- **ROC-AUC Score:**
+  - Logistic Regression: ~X.XXX
+  - Random Forest: ~Y.XXX
+- **Top Predictive Features (Random Forest):**
+  - Tenure
+  - Contract type
+  - MonthlyCharges
+  - PaymentMethod
+- **Final Model:** Random Forest Pipeline
+  - Includes preprocessing, feature transformation, and classifier.
+  - Ready for deployment.
 
-4. Hyperparameter Tuning with GridSearchCV
-Model	Parameters Tuned	Search Space
-Logistic Regression	C, penalty, solver	C: [0.01, 0.1, 1, 10, 100]
-penalty: ['l1', 'l2']
-solver: ['liblinear', 'saga']
-Random Forest	n_estimators, max_depth, min_samples_split, min_samples_leaf, class_weight	n_estimators: [50, 100, 200]
-max_depth: [None, 10, 20, 30]
-min_samples_split: [2, 5, 10]
-min_samples_leaf: [1, 2, 4]
-class_weight: [None, 'balanced']
-5. Model Evaluation Strategy
-Train-Test Split: 80-20 with stratification
+---
 
-Cross-Validation: 5-fold cross-validation during grid search
+## Usage
 
-Metrics: Accuracy, Precision, Recall, F1-Score, ROC-AUC
+```python
+import pandas as pd
+import joblib
 
-Visualizations: Confusion matrices, ROC curves, Feature importance plots
+# Load pipeline
+model = joblib.load('models/customer_churn_pipeline.pkl')
 
-6. Production Deployment Preparation
-Complete pipeline serialization using joblib
+# Make predictions
+sample_data = pd.read_csv('data/sample_data.csv')
+predictions = model.predict(sample_data)
+probabilities = model.predict_proba(sample_data)
+Requirements
 
-Metadata storage for model versioning
+Python 3.8+
 
-Error handling for missing values and unknown categories
+pandas
 
-Prediction function for easy integration
+numpy
 
-📊 Key Results and Observations
-Model Performance Comparison
-Model	Accuracy	ROC-AUC	Precision (Churn)	Recall (Churn)	F1-Score (Churn)
-Logistic Regression	80.1%	0.846	0.65	0.54	0.59
-Random Forest	79.4%	0.858	0.65	0.51	0.57
-Key Observations
-1. Model Performance
-Random Forest achieved the highest ROC-AUC score (0.858), making it the preferred model for production
+scikit-learn
 
-Logistic Regression provides more balanced precision-recall trade-off
+matplotlib
 
-Both models show room for improvement in recall for churn class (identifying actual churners)
+seaborn
 
-2. Feature Importance Analysis
-The top 5 most important features for predicting churn are:
-
-Rank	Feature	Importance Score	Business Insight
-1	Tenure	0.18	Customers with <6 months tenure are 4x more likely to churn
-2	Monthly Charges	0.15	High charges (>$80) increase churn risk by 60%
-3	Contract Type	0.12	Month-to-month contracts have 3x higher churn rate
-4	Internet Service Type	0.10	Fiber optic users show 40% higher churn
-5	Payment Method	0.08	Electronic check users churn 2x more
-3. Business Insights
-High-Risk Customer Profile:
-
-Tenure: Less than 6 months
-
-Contract: Month-to-month
-
-Monthly Charges: Above $80
-
-Internet Service: Fiber optic
-
-Payment Method: Electronic check
-
-No tech support or online security services
-
-Low-Risk Customer Profile:
-
-Tenure: More than 2 years
-
-Contract: Two-year contract
-
-Monthly Charges: Below $50
-
-Internet Service: DSL or No internet
-
-Payment Method: Automatic bank transfer
-
-Has tech support and online security
-
-4. Production Readiness
-Test	Result	Status
-Missing Value Handling	Pipeline successfully imputes missing values	✅
-Unknown Category Handling	OneHotEncoder handles unknown categories gracefully	✅
-Model Serialization	Complete pipeline saved and loaded successfully	✅
-Prediction Speed	Average 50ms per 100 customers	✅
-Memory Usage	~150MB for loaded model	✅
-5. Business Impact Analysis
-Potential Savings: $2.5M annually through targeted retention programs
-
-ROI Projection: 300% return on retention campaign investment
-
-Early Detection: Identifies at-risk customers 3 months in advance
-
-Campaign Efficiency: Reduces retention campaign costs by 40%
-
-Visualizations
-Confusion Matrix - Random Forest
-text
-                Predicted
-              No Churn  Churn
-Actual No Churn    925     110
-Actual Churn       180     194
-True Negatives: 925 (correctly predicted non-churners)
-
-False Positives: 110 (incorrectly predicted churn)
-
-False Negatives: 180 (missed churners - highest concern)
-
-True Positives: 194 (correctly predicted churners)
-
-ROC Curve Analysis
-Area Under Curve (AUC): 0.858
-
-Optimal threshold: 0.35 (balances precision and recall)
-
-At this threshold: Recall improves to 0.65, Precision drops to 0.58
-
-Limitations and Future Improvements
-Current Limitations:
-
-Recall for churn class is below 60%
-
-Model may not generalize to different time periods
-
-Limited feature engineering
-
-No external data sources integrated
-
-Proposed Improvements:
-
-Implement SMOTE for handling class imbalance
-
-Add more algorithms (XGBoost, LightGBM, Neural Networks)
-
-Create ensemble of multiple models
-
-Incorporate time-based features
-
-Add external data (economic indicators, competitor information)
+joblib
